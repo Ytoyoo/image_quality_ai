@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 
 from extensions import db
 from models import Image
+from models import User
 from config import Config
 
 main_bp = Blueprint("main", __name__)
@@ -18,11 +19,11 @@ def index():
             return "Файл не выбран", 400
 
         # ВАЖНО: для простоты пока используем одного пользователя
-        #user = User.query.first()
-        #if not user:
-        #    user = User(email="demo@user.com")
-        #    db.session.add(user)
-        #    db.session.commit()
+        user = User.query.first()
+        if not user:
+            user = User(email="demo@user.com")
+            db.session.add(user)
+            db.session.commit()
 
         filename = secure_filename(file.filename)
 
@@ -34,7 +35,7 @@ def index():
         file.save(original_path)
 
         image = Image(
-            #user_id=user.id,
+            user_id=user.id,
             original_filename=filename
         )
         db.session.add(image)
