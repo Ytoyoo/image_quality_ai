@@ -13,3 +13,10 @@ class Image(db.Model):
     sessions = db.relationship(
         "ProcessingSession", backref="image", cascade="all, delete-orphan"
     )
+
+    analyses = db.relationship(
+        "ImageAnalysis",
+        backref="image",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )

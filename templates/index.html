@@ -2,15 +2,146 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Image Quality AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Quality AI — Улучши свои фото</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            color: #333;
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 35px;
+            line-height: 1.5;
+        }
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 16px;
+            padding: 50px 30px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        .upload-area:hover {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: #5a6fd8;
+        }
+        .upload-area i {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .upload-area p {
+            font-size: 1.1rem;
+            color: #444;
+        }
+        .upload-area small {
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: block;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        @media (max-width: 500px) {
+            .container {
+                padding: 40px 25px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Загрузка изображения</h1>
+
+<div class="container">
+    <h1>Image Quality AI</h1>
+    <p class="subtitle">Загружай фото и узнай, как его можно улучшить!<br>Автоматический анализ и улучшение за секунды</p>
 
     <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" accept="image/*" required>
-        <br><br>
-        <button type="submit">Загрузить</button>
+        <label for="image" class="upload-area">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Перетащи фото сюда или нажми, чтобы выбрать</p>
+            <small>Поддерживаемые форматы: JPG, PNG, WEBP, до 10 МБ</small>
+            <input type="file" id="image" name="image" accept="image/*" required>
+        </label>
+
+        <button type="submit">Анализировать изображение</button>
     </form>
+</div>
+
+<script>
+    // Подсветка при drag-and-drop
+    const uploadArea = document.querySelector('.upload-area');
+    ['dragenter', 'dragover'].forEach(event => {
+        uploadArea.addEventListener(event, e => {
+            e.preventDefault();
+            uploadArea.style.background = 'rgba(102, 126, 234, 0.25)';
+        });
+    });
+    ['dragleave', 'drop'].forEach(event => {
+        uploadArea.addEventListener(event, () => {
+            uploadArea.style.background = 'rgba(102, 126, 234, 0.05)';
+        });
+    });
+</script>
+
 </body>
 </html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результат улучшения</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #222;
+        }
+        .comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .image-block {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+        .image-block img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: block;
+            margin: 0 auto 12px;
+        }
+        .label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .metric-card {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-card strong {
+            font-size: 1.3em;
+            color: #007bff;
+        }
+        .metric-card span {
+            font-size: 0.95em;
+            color: #555;
+            display: block;
+            margin-top: 4px;
+        }
+        .verdict {
+            margin: 20px 0;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            color: white;
+        }
+        .download-btn {
+            background: #28a745;
+        }
+        .download-btn:hover { background: #218838; }
+        .back-btn {
+            background: #6c757d;
+        }
+        .back-btn:hover { background: #5a6268; }
+        @media (max-width: 768px) {
+            .comparison {
+                flex-direction: column;
+                gap: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Результат улучшения</h1>
+
+    <!-- До и После -->
+    <h1>Результат улучшения</h1>
+
+    <div class="comparison">
+        <div class="image-block">
+            <div class="label">До улучшения</div>
+            <img src="{{ url_for('static', filename='uploads/' + image.original_filename) }}">
+            <ul>
+                <li>Яркость: {{ original_metrics.brightness }}</li>
+                <li>Резкость: {{ original_metrics.sharpness }}</li>
+                <li>Шум: {{ original_metrics.noise }}</li>
+                <li>Контраст: {{ original_metrics.contrast }}</li>
+            </ul>
+        </div>
+
+        <div class="image-block">
+            <div class="label">После улучшения</div>
+            <img src="{{ url_for('static', filename='uploads/' + result.processed_filename) }}">
+            <ul>
+                <li>Яркость: {{ processed_metrics.brightness }}</li>
+                <li>Резкость: {{ processed_metrics.sharpness }}</li>
+                <li>Шум: {{ processed_metrics.noise }}</li>
+                <li>Контраст: {{ processed_metrics.contrast }}</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- Вердикт -->
+    <div class="verdict">
+        <strong>Вердикт:</strong> {{ result.verdict.replace(';', ' • ') }}
+        <br>
+        <strong>Балл качества:</strong> {{ result.quality_score|round(2) }}
+    </div>
+
+    <!-- Кнопки -->
+    <div class="buttons">
+        <a href="{{ url_for('static', filename='uploads/' + result.processed_filename) }}" 
+           download="{{ result.processed_filename }}" 
+           class="btn download-btn">
+            Скачать улучшенное
+        </a>
+
+        <a href="{{ url_for('main.upload_image') }}" class="btn back-btn">
+            Загрузить другое фото
+        </a>
+        <a href="{{ url_for('main.image_history', image_id=image.id) }}">
+            История обработок
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>

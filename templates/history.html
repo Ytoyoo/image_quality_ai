@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>История обработок</title>
+</head>
+<body>
+
+<h1>История обработок: {{ image.original_filename }}</h1>
+
+{% for session in sessions %}
+    {% if session.result %}
+        <hr>
+        <p><b>Дата:</b> {{ session.created_at }}</p>
+        <p><b>Вердикт:</b> {{ session.result.verdict }}</p>
+        <p><b>Балл:</b> {{ session.result.quality_score }}</p>
+
+        <img src="{{ url_for('static',
+            filename='uploads/' + session.result.processed_filename) }}"
+             width="300">
+    {% endif %}
+{% endfor %}
+
+</body>
+</html>
