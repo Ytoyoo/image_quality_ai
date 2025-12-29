@@ -31,8 +31,7 @@ def upload_image():
 
         file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
-
-        # ❗ временно user_id = 1
+        
         image = Image(
             user_id=1,
             original_filename=filename,
@@ -79,48 +78,65 @@ def analyze_image_route(image_id):
 
 @main_bp.route("/process/<int:session_id>", methods=["POST"])
 def process_image_service(session_id):
-    session = ProcessingSession.query.get_or_404(session_id)
-    image = session.image
+    old_session = ProcessingSession.query.get_or_404(session_id)
+    image = old_session.image
 
     upload_dir = current_app.config["UPLOAD_FOLDER"]
     image_path = os.path.join(upload_dir, image.original_filename)
 
-    # действия ИЗ ФОРМЫ
+    # Анализируем заново (на случай, если пользователь изменил что-то)
+    metrics = analyze_image(image_path)
+
+    # Создаём НОВУЮ сессию для этой обработки
+    new_session = ProcessingSession(
+        image_id=image.id,
+        brightness_score=metrics["brightness"],
+        sharpness_score=metrics["sharpness"],
+        blur_score=metrics["noise"],
+        color_balance_score=metrics["contrast"],
+    )
+    db.session.add(new_session)
+    db.session.commit()  # commit, чтобы получить new_session.id
+
     actions = {
         "enhance_brightness": "enhance_brightness" in request.form,
         "sharpen": "sharpen" in request.form,
         "denoise": "denoise" in request.form,
-        "confidence": 0.0,
-        "summary": []
+        "auto_improve": "auto_improve" in request.form,
     }
 
-    # summary для Result
-    if actions["enhance_brightness"]:
-        actions["summary"].append("Повышена яркость")
-    if actions["sharpen"]:
-        actions["summary"].append("Повышена резкость")
-    if actions["denoise"]:
-        actions["summary"].append("Удалён шум")
-
-    actions["confidence"] = round(
-        sum(actions[k] for k in ["enhance_brightness", "sharpen", "denoise"]) / 3,
-        2
-    )
-
-    # обработка
-    output_path = process_image(
+    processed_filename = process_image(
         image_path=image_path,
         actions=actions,
-        output_dir=upload_dir
+        output_dir=upload_dir,
+        metrics={
+            "brightness": new_session.brightness_score,
+            "sharpness": new_session.sharpness_score,
+            "noise": new_session.blur_score,
+            "contrast": new_session.color_balance_score,
+        }
     )
+
+    # Verdict и confidence
+    summary = []
+    if actions.get("auto_improve"):
+        summary.append("Автоматический адаптивный режим")
+    if actions.get("enhance_brightness"):
+        summary.append("Повышена яркость")
+    if actions.get("sharpen"):
+        summary.append("Улучшена резкость")
+    if actions.get("denoise"):
+        summary.append("Убран шум")
+
+    verdict = " • ".join(summary) if summary else "Ничего не применено"
+    confidence = round(len(summary) / 4, 2)
 
     result = Result(
-        session_id=session.id,
-        processed_filename=os.path.basename(output_path),
-        quality_score=actions["confidence"],
-        verdict="; ".join(actions["summary"])
+        session_id=new_session.id,  # ← привязываем к новой сессии
+        processed_filename=processed_filename,
+        quality_score=confidence,
+        verdict=verdict
     )
-
     db.session.add(result)
     db.session.commit()
 
@@ -130,19 +146,8 @@ def process_image_service(session_id):
 @main_bp.route("/image/<int:image_id>/history")
 def image_history(image_id):
     image = Image.query.get_or_404(image_id)
-
-    sessions = (
-        ProcessingSession.query
-        .filter_by(image_id=image.id)
-        .order_by(ProcessingSession.created_at.desc())
-        .all()
-    )
-
-    return render_template(
-        "history.html",
-        image=image,
-        sessions=sessions
-    )
+    sessions = ProcessingSession.query.filter_by(image_id=image_id).order_by(ProcessingSession.created_at.desc()).all()
+    return render_template("history.html", image=image, sessions=sessions)
 
 
 @main_bp.route("/result/<int:result_id>")

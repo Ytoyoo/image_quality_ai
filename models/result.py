@@ -8,8 +8,7 @@ class Result(db.Model):
     session_id = db.Column(
         db.Integer,
         db.ForeignKey("processing_sessions.id"),
-        unique=True,
-        nullable=False
+        nullable=False  # ← убираем unique=True
     )
     processed_filename = db.Column(db.String(255), nullable=False)
     quality_score = db.Column(db.Float)
